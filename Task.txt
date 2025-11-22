@@ -1,0 +1,27 @@
+Objective:
+
+Develop Container and Kubernetes artifacts perform DL training and DL inference hosting in Kubernetes cluster from the cloud vender of one’s own choice.
+The work demands self-driven deep dive into Kubernetes concepts and components.
+Application containers
+
+Training: training program, container definition file (dockerfile), training job yaml file
+Inference: inference program, dockerfile, service yaml file, deployment yaml file
+Training and inference program need to store and load (https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html) the trained model persistently.
+Host a URL to allow interaction with User.
+User interaction
+Give any input to the inference engine (a number, a space bar, image file, image id in the data set)
+Persistent storage
+PVC (https://devopscube.com/persistent-volume-google-kubernetes-engine/) example and how-to for PV and PVC on GKE
+Platform
+Google Cloud, No GPU.
+AI Model: MNIST is sufficient. It’s ok to use more complex models such as ImageNet, small language model, etc.
+Submission
+
+Source code, files containing your own work or being modified by you (40 points)
+Report (60 points, less than 5 pages)
+Document your steps to implement them (training, inferencing). workflow, observations with attention to details, map to learnt concepts, code comments or explanations, and discussions
+Screen capture(s) of user interface with input/output example
+Document any issues/problems
+Discuss how to implement container self-healing mechanism in your service
+The purpose of the report is to show your ability not only to create the backend AI service on Cloud, but also to connect the backend to the frontend service
+Good writing etiquette - quotations/citations are necessary, and logical

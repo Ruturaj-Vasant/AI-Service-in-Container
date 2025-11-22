@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mnist-inference-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mnist-inference
+  template:
+    metadata:
+      labels:
+        app: mnist-inference
+    spec:
+      containers:
+        - name: server
+          image: asia-east1-docker.pkg.dev/csci-ga-3033085/mnist-repo/mnist-infer:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MODEL_DIR
+              value: /mnt/model
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          volumeMounts:
+            - name: model-vol
+              mountPath: /mnt/model
+      volumes:
+        - name: model-vol
+          persistentVolumeClaim:
+            claimName: mnist-model-pvc
+

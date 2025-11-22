@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mnist-training-job
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: trainer
+          image: asia-east1-docker.pkg.dev/csci-ga-3033085/mnist-repo/mnist-train:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MODEL_DIR
+              value: /mnt/model
+            - name: EPOCHS
+              value: "1"
+            - name: BATCH_SIZE
+              value: "64"
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+          volumeMounts:
+            - name: model-vol
+              mountPath: /mnt/model
+      volumes:
+        - name: model-vol
+          persistentVolumeClaim:
+            claimName: mnist-model-pvc
+

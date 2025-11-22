@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+.venv
+venv
+AI_Service
+.DS_Store
+*.log
+*.pth
+data/
+

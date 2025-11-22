@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+
+# Virtualenvs
+.venv/
+venv/
+AI_Service/
+
+# OS / Editor
+.DS_Store
+*.log
+
+# Data / artifacts
+*.pth
+data/
+
+# Reports: include only the final PDF
+Report/*
+!Report/report.pdf
+
