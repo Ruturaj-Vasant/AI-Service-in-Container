@@ -18,8 +18,10 @@ AI_Service/
 *.pth
 data/
 
-# Reports: include only the final PDF
+# Reports: include only specific outputs
 Report/*
 !Report/report.pdf
+!Report/MNIST_upload.png
+!Report/MNIST_result.png
 
 AI_Service_in_Container.docx
