@@ -1,3 +1,13 @@
+"""Generate two tiny MNIST-like test images.
+
+Outputs
+-------
+- one.png  : a simple vertical stroke approximately resembling the digit 1
+- zero.png : a ring/ellipse resembling the digit 0
+
+These are useful for quick, offline checks of the inference server.
+"""
+
 from PIL import Image, ImageDraw
 from pathlib import Path
 
@@ -17,4 +27,3 @@ d0.ellipse((4, 4, 24, 24), outline=255, width=4)
 img0.save(outdir / "zero.png")
 
 print(f"Wrote: {outdir / 'one.png'} and {outdir / 'zero.png'}")
-

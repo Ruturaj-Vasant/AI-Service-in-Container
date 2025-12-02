@@ -1,3 +1,17 @@
+"""FastAPI inference server for MNIST (CPU only).
+
+Purpose
+-------
+- Load the trained weights from `MODEL_DIR/model.pth` on startup.
+- Provide a minimal web UI at `/` and a POST `/predict` endpoint that accepts
+  an image file and returns the predicted class + softmax probabilities.
+
+Key environment variables
+-------------------------
+- MODEL_DIR : directory containing `model.pth` (default `/mnt/model`). In-cluster
+  this is the same PVC mount path used by training.
+"""
+
 import os
 from pathlib import Path
 from typing import Optional
@@ -14,6 +28,7 @@ from torchvision import transforms
 
 
 class Net(nn.Module):
+    """Same architecture used during training (must match shapes)."""
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
@@ -39,6 +54,7 @@ class Net(nn.Module):
 
 
 def load_model(model_path: Path) -> Net:
+    """Load weights from disk into a fresh Net and set eval mode."""
     model = Net()
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found at {model_path}")
@@ -57,18 +73,21 @@ model: Optional[Net] = None
 
 @app.on_event("startup")
 def _load_on_start():
+    """Load the model once when the process starts."""
     global model
     model = load_model(MODEL_PATH)
 
 
 @app.get("/healthz")
 def healthz():
+    """Lightweight readiness/liveness check for probes."""
     ok = MODEL_PATH.exists()
     return {"status": "ok" if ok else "no-model"}
 
 
 @app.get("/", response_class=HTMLResponse)
 def index():
+    """Tiny HTML form to upload an image to /predict from a browser."""
     return """
     <!doctype html>
     <html>
@@ -132,6 +151,11 @@ transform = transforms.Compose(
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
+    """Run inference on an uploaded image.
+
+    Accepts multipart form field `file`. Converts to 1x28x28 grayscale,
+    applies the same normalization as training, and returns JSON.
+    """
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
@@ -141,7 +165,8 @@ async def predict(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image: {e}")
 
-    x = transform(img).unsqueeze(0)  # [1,1,28,28]
+    # Prepare tensor of shape [B,C,H,W] = [1,1,28,28]
+    x = transform(img).unsqueeze(0)
     with torch.no_grad():
         logits = model(x)
         pred = int(torch.argmax(logits, dim=1).item())

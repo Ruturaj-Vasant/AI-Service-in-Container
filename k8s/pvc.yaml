@@ -1,3 +1,5 @@
+## Persistent storage for the trained model
+## - Requests a 5Gi ReadWriteOnce volume using the default regional PD class
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -9,4 +11,3 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: standard-rwo
-

@@ -1,3 +1,5 @@
+## Inference Deployment (FastAPI)
+## - Long-running server that mounts the same PVC and reads model.pth
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,7 +16,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: asia-east1-docker.pkg.dev/csci-ga-3033085/mnist-repo/mnist-infer:latest
+          image: asia-east1-docker.pkg.dev/csci-ga-3033085/mnist-repo/mnist-infer:latest  # replace with your registry
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -47,4 +49,3 @@ spec:
         - name: model-vol
           persistentVolumeClaim:
             claimName: mnist-model-pvc
-

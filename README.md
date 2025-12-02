@@ -2,6 +2,17 @@
 
 End-to-end MNIST on GKE: a one-shot Job trains a CNN and saves `model.pth` to a PersistentVolumeClaim; a FastAPI server loads the model and exposes `/predict` (with a tiny upload UI).
 
+## Conceptual Overview
+
+- PersistentVolumeClaim (PVC): durable disk in your cluster. Training writes weights there; inference reads them later, even if pods restart.
+- Job vs. Deployment:
+  - Job: run-once workload (training then exit).
+  - Deployment: long-running service (inference, self-healing, scalable).
+- Service:
+  - LoadBalancer exposes the Deployment publicly (costs while active).
+  - Port-forward is free and good for quick testing.
+- Artifact Registry: container image store that GKE nodes pull from.
+
 ## Screenshots
 
 | Upload UI | Prediction Result |
@@ -107,3 +118,28 @@ gcloud artifacts repositories delete $REPO --location=$REGION --quiet
 Notes
 - PVC is the durable disk; training writes to `/mnt/model`, inference reads from it.
 - Apple Silicon must build `linux/amd64` images for GKE nodes.
+
+## Troubleshooting
+
+- kubectl cannot authenticate (gke-gcloud-auth-plugin not found):
+  - Install the plugin and set `USE_GKE_GCLOUD_AUTH_PLUGIN=True`.
+- `GET /predict` shows “Method Not Allowed”:
+  - `/predict` is POST-only with multipart `file`. Use the UI at `/` or `curl -F file=@...`.
+- Apple Silicon container fails on GKE:
+  - Ensure `export DOCKER_DEFAULT_PLATFORM=linux/amd64` before `docker build`.
+- Training Job Pending:
+  - Autopilot may need a few minutes to scale nodes. It will proceed once capacity is available.
+
+## Local-Only Quick Check (no cloud)
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+pip install fastapi uvicorn[standard] pillow python-multipart
+
+export MODEL_DIR=$(pwd)/local_model_dir
+python training/training.py
+uvicorn inference.inference:app --host 0.0.0.0 --port 8080
+python3 samples/gen_samples.py
+curl -s -X POST -F "file=@samples/zero.png" http://127.0.0.1:8080/predict | jq
+```

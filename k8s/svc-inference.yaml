@@ -1,3 +1,6 @@
+## Public Service (LoadBalancer)
+## - Creates an external IP for the Deployment
+## - Costs: charged while active; consider using port-forward during development
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,4 +12,3 @@ spec:
   ports:
     - port: 80
       targetPort: 8080
-

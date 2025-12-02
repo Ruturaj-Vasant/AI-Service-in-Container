@@ -1,3 +1,6 @@
+## One-time trainer job
+## - Runs the training container once and exits when model.pth is written
+## - Mounts the PVC at /mnt/model so the weights persist after completion
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -9,7 +12,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: trainer
-          image: asia-east1-docker.pkg.dev/csci-ga-3033085/mnist-repo/mnist-train:latest
+          image: asia-east1-docker.pkg.dev/csci-ga-3033085/mnist-repo/mnist-train:latest  # replace with your registry
           imagePullPolicy: IfNotPresent
           env:
             - name: MODEL_DIR
@@ -32,4 +35,3 @@ spec:
         - name: model-vol
           persistentVolumeClaim:
             claimName: mnist-model-pvc
-
